@@ -1,0 +1,7 @@
+{
+  "name": "ThaiHung Architecture CRM - Quản lý Kiến trúc",
+  "description": "Hệ thống quản lý khách hàng và dự án tinh gọn dành cho các studio kiến trúc vừa và nhỏ tại Việt Nam.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
