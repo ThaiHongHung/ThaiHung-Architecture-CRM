@@ -60,7 +60,7 @@ const WorkloadManager: React.FC<WorkloadManagerProps> = ({ projects, onViewProje
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-800">Quản lý Nhân sự & Tải công việc</h2>
+        <h2 className="text-2xl font-bold text-slate-800">Quản lý Nhân sự thực hiện Dự án</h2>
         <p className="text-slate-500">Giám sát khối lượng dự án và chi tiết nhân sự theo bộ môn.</p>
       </div>
 
