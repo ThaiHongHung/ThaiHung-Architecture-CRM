@@ -94,9 +94,10 @@ const ClientManager: React.FC<ClientManagerProps> = ({
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+        {/* VÙNG NHẬP TÌM KIẾM - ĐÃ CHỈNH SỬA SANG MÀU SÁNG */}
+        <div className="p-5 border-b border-slate-100 bg-slate-50/30">
           <div className="relative max-w-md">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+            <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -106,7 +107,7 @@ const ClientManager: React.FC<ClientManagerProps> = ({
               placeholder="Tìm theo tên hoặc số điện thoại..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              className="block w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm text-slate-700 placeholder:text-slate-400 placeholder:font-medium transition-all shadow-sm"
             />
           </div>
         </div>

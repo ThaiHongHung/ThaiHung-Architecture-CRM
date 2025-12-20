@@ -36,9 +36,11 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
   
   const [isEditingTotalValue, setIsEditingTotalValue] = useState(false);
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
+  const [editingPaymentNameId, setEditingPaymentNameId] = useState<string | null>(null);
   
   const [tempTotalValue, setTempTotalValue] = useState(0);
   const [tempPaymentAmount, setTempPaymentAmount] = useState(0);
+  const [tempPaymentName, setTempPaymentName] = useState("");
 
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -52,7 +54,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
     meEngineer: '',
     plumbingEngineer: '',
     contractSigningDate: todayStr,
-    contractDeadline: '', // Thêm hạn hoàn thành tổng thể
+    contractDeadline: '',
     contractType: 'Thiết kế' as ContractType,
     projectType: 'Thấp tầng' as ProjectType,
     totalValue: 0,
@@ -100,6 +102,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
     );
     onUpdateProject({ ...selectedProject, payments: updatedPayments });
     setEditingPaymentId(null);
+    setEditingPaymentNameId(null);
   };
 
   const handleSaveTotalValue = () => {
@@ -121,7 +124,6 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
   const handleAddPayment = () => {
     if (!selectedProject) return;
     
-    // Tạo đợt tạm ứng mới
     const newPayment: PaymentMilestone = {
       id: generateId(),
       name: `Tạm ứng đợt ${selectedProject.payments.length}`, 
@@ -132,7 +134,6 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
 
     const currentPayments = [...selectedProject.payments];
     if (currentPayments.length > 0) {
-      // Chèn đợt mới vào TRƯỚC đợt cuối cùng (đợt Quyết toán)
       const lastPayment = currentPayments.pop()!;
       onUpdateProject({ 
         ...selectedProject, 
@@ -302,8 +303,8 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
             <>
               {/* CHI TIẾT DỰ ÁN HEADER */}
               <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-4 w-full md:w-2/3">
+                <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+                  <div className="space-y-4 flex-1">
                     <div className="flex flex-wrap items-center gap-3">
                       <div className="flex items-center space-x-1 bg-indigo-600 text-white text-[10px] font-black px-2 py-1 rounded uppercase tracking-wider">
                         <input 
@@ -315,27 +316,27 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                       </div>
                       <span className="bg-indigo-50 text-indigo-600 text-[10px] font-black px-2 py-1 rounded uppercase tracking-wider">{selectedProject.projectType}</span>
                       
-                      {/* Ngày ký HĐ */}
-                      <div className="flex items-center space-x-1.5 text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100">
+                      {/* Ngày ký HĐ - Đậm màu hơn */}
+                      <div className="flex items-center space-x-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 shadow-sm">
                          <Icons.Dashboard />
-                         <span className="text-[10px] font-black uppercase whitespace-nowrap">Ký HĐ:</span>
+                         <span className="text-[10px] font-black uppercase whitespace-nowrap">Ký:</span>
                          <input 
                           type="date" 
                           value={selectedProject.contractSigningDate || todayStr} 
                           onChange={(e) => updateProjectBasicInfo({ contractSigningDate: e.target.value })}
-                          className="bg-transparent border-none p-0 text-[10px] font-black text-emerald-600 focus:ring-0 w-24 cursor-pointer"
+                          className="bg-transparent border-none p-0 text-[10px] font-black text-emerald-800 focus:ring-0 w-24 cursor-pointer"
                         />
                       </div>
 
-                      {/* Hạn HĐ tổng thể */}
-                      <div className="flex items-center space-x-1.5 text-rose-600 bg-rose-50 px-2 py-1 rounded-lg border border-rose-100">
+                      {/* Hạn HĐ tổng thể - Đậm màu hơn */}
+                      <div className="flex items-center space-x-1.5 text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 shadow-sm">
                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                          <span className="text-[10px] font-black uppercase whitespace-nowrap">Hạn HĐ:</span>
                          <input 
                           type="date" 
                           value={selectedProject.contractDeadline || ''} 
                           onChange={(e) => updateProjectBasicInfo({ contractDeadline: e.target.value })}
-                          className="bg-transparent border-none p-0 text-[10px] font-black text-rose-600 focus:ring-0 w-24 cursor-pointer"
+                          className="bg-transparent border-none p-0 text-[10px] font-black text-rose-800 focus:ring-0 w-24 cursor-pointer"
                         />
                       </div>
                     </div>
@@ -348,20 +349,21 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                       placeholder="Nhập tên dự án..."
                     />
                     
-                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-slate-500">
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-slate-500">
                       <p className="text-sm font-medium">Khách hàng: <span className="text-indigo-600 font-bold">{clientOfSelected?.name}</span></p>
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-300 hidden md:block"></span>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium">Loại HĐ:</span>
+                      
+                      <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                        <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider">Loại HĐ:</span>
                         <select 
                           value={selectedProject.contractType} 
                           onChange={(e) => updateProjectBasicInfo({ contractType: e.target.value as ContractType })}
-                          className="text-sm font-bold text-slate-800 bg-slate-50 hover:bg-indigo-50 px-2 py-1 rounded transition-colors border-none outline-none cursor-pointer focus:ring-2 focus:ring-indigo-200"
+                          className="text-[11px] font-black text-slate-800 bg-transparent border-none outline-none cursor-pointer appearance-none hover:text-indigo-600 transition-colors p-0 pr-1"
                         >
-                          <option value="Thiết kế">Thiết kế</option>
-                          <option value="Thi công">Thi công</option>
-                          <option value="Trọn gói">Trọn gói</option>
+                          <option value="Thiết kế">THIẾT KẾ</option>
+                          <option value="Thi công">THI CÔNG</option>
+                          <option value="Trọn gói">TRỌN GÓI</option>
                         </select>
+                        <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                       </div>
                     </div>
                   </div>
@@ -455,15 +457,15 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                       {selectedProject.stages.map(stage => {
                         const isOverdue = stage.status !== 'Hoàn thành' && stage.deadline && stage.deadline < todayStr;
                         return (
-                          <div key={stage.id} className={`p-6 rounded-2xl border transition-all ${isOverdue ? 'bg-rose-50/50 border-rose-200 ring-1 ring-rose-100' : 'bg-slate-50/30 border-slate-100'}`}>
+                          <div key={stage.id} className={`p-6 rounded-2xl border transition-all ${isOverdue ? 'bg-rose-50 border-rose-200 ring-2 ring-rose-100 shadow-sm' : 'bg-slate-50/30 border-slate-100'}`}>
                              <div className="flex justify-between items-start mb-4">
-                                <h5 className={`font-bold ${isOverdue ? 'text-rose-800' : 'text-slate-800'}`}>{stage.name}</h5>
+                                <h5 className={`font-bold ${isOverdue ? 'text-rose-900' : 'text-slate-800'}`}>{stage.name}</h5>
                                 <select 
                                   value={stage.status}
                                   onChange={(e) => updateStageStatus(stage.id, e.target.value as ProjectStageStatus)}
                                   className={`text-[10px] font-black px-3 py-1.5 rounded-xl border-none outline-none cursor-pointer appearance-none ${
-                                    stage.status === 'Hoàn thành' ? 'bg-emerald-500 text-white' :
-                                    stage.status === 'Đang làm' ? 'bg-amber-400 text-white' : 'bg-slate-200 text-slate-500'
+                                    stage.status === 'Hoàn thành' ? 'bg-emerald-600 text-white' :
+                                    stage.status === 'Đang làm' ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-600'
                                   }`}
                                 >
                                    <option>Chưa làm</option>
@@ -474,7 +476,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                              
                              <div className="space-y-4">
                                 <div>
-                                   <label className={`text-[9px] font-black uppercase tracking-wider mb-1 block ${isOverdue ? 'text-rose-500 animate-pulse' : 'text-slate-400'}`}>
+                                   <label className={`text-[9px] font-black uppercase tracking-wider mb-1 block ${isOverdue ? 'text-rose-600 animate-pulse' : 'text-slate-500'}`}>
                                       Hạn nộp hồ sơ
                                    </label>
                                    <div className="flex items-center space-x-2">
@@ -483,7 +485,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                                         type="date" 
                                         value={stage.deadline || ''} 
                                         onChange={(e) => updateStageDeadline(stage.id, e.target.value)}
-                                        className={`bg-transparent border-none p-0 text-xs font-bold focus:ring-0 cursor-pointer ${isOverdue ? 'text-rose-600' : 'text-slate-500'}`}
+                                        className={`bg-transparent border-none p-0 text-xs font-black focus:ring-0 cursor-pointer ${isOverdue ? 'text-rose-700' : 'text-slate-700'}`}
                                       />
                                    </div>
                                 </div>
@@ -491,7 +493,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                                 <div className="flex justify-end pt-2 border-t border-slate-200/50">
                                   <button 
                                     onClick={() => handleFileUpload(stage.id)}
-                                    className={`p-2 rounded-lg transition-colors ${isOverdue ? 'bg-rose-100 text-rose-600 hover:bg-rose-200' : 'text-slate-300 hover:text-indigo-600 hover:bg-indigo-50'}`}
+                                    className={`p-2 rounded-lg transition-colors ${isOverdue ? 'bg-rose-100 text-rose-700 hover:bg-rose-200' : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'}`}
                                     title="Tải hồ sơ nộp"
                                   >
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
@@ -526,8 +528,8 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
 
                   <div className={`p-6 rounded-2xl border flex justify-between items-center transition-all ${isBalanced ? 'bg-emerald-50/40 border-emerald-100' : 'bg-rose-50 border-rose-100'}`}>
                     <div className="space-y-1">
-                      <p className="text-[11px] font-black text-slate-400 uppercase">Cân đối dòng tiền</p>
-                      <p className="text-sm font-bold text-slate-700">
+                      <p className="text-[11px] font-black text-slate-500 uppercase tracking-tight">Cân đối dòng tiền</p>
+                      <p className="text-sm font-bold text-slate-800">
                         {isBalanced ? 'Đã phân bổ đủ giá trị HĐ' : `Còn thiếu: ${formatCurrency(balanceDifference)}`}
                       </p>
                     </div>
@@ -545,30 +547,47 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                     {selectedProject.payments.map((pay, index) => {
                       const isLast = index === selectedProject.payments.length - 1;
                       const isEditing = editingPaymentId === pay.id;
+                      const isEditingName = editingPaymentNameId === pay.id;
                       const isOverdue = pay.status !== 'Đã thu' && pay.dueDate < todayStr;
                       const effectiveStatus = isOverdue ? 'Quá hạn' : pay.status;
 
                       return (
                         <div key={pay.id} className={`p-5 rounded-2xl border flex items-center justify-between transition-all ${
                           isLast ? 'bg-slate-50/50 border-indigo-200 ring-1 ring-indigo-50 shadow-sm' : 'bg-white border-slate-50'
-                        } ${isEditing ? 'ring-2 ring-indigo-500 border-indigo-200' : ''}`}>
+                        } ${(isEditing || isEditingName) ? 'ring-2 ring-indigo-500 border-indigo-200' : ''}`}>
                           <div className="flex-1 pr-4">
                             <div className="flex items-center space-x-2 mb-1">
-                              <h5 className={`text-base font-bold ${isLast ? 'text-indigo-800' : 'text-slate-800'}`}>
-                                {isLast ? 'Quyết toán' : pay.name}
-                              </h5>
+                              {isEditingName ? (
+                                <input 
+                                  type="text" 
+                                  autoFocus
+                                  className="text-base font-bold text-indigo-800 border-b border-indigo-500 outline-none bg-white px-1"
+                                  value={tempPaymentName}
+                                  onChange={(e) => setTempPaymentName(e.target.value)}
+                                  onBlur={() => handleUpdatePayment(pay.id, { name: tempPaymentName })}
+                                  onKeyDown={(e) => e.key === 'Enter' && handleUpdatePayment(pay.id, { name: tempPaymentName })}
+                                />
+                              ) : (
+                                <h5 
+                                  className={`text-base font-bold cursor-pointer hover:text-indigo-600 transition-colors ${isLast ? 'text-indigo-900' : 'text-slate-800'}`}
+                                  onClick={() => { setEditingPaymentNameId(pay.id); setTempPaymentName(pay.name); }}
+                                >
+                                  {isLast ? 'Quyết toán' : pay.name}
+                                </h5>
+                              )}
+                              
                               {isLast && (
                                 <span className="bg-indigo-600 text-white text-[7px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Final</span>
                               )}
                               {isOverdue && (
-                                <span className="bg-rose-100 text-rose-600 text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase animate-pulse">Trễ hạn</span>
+                                <span className="bg-rose-100 text-rose-700 text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase animate-pulse">Trễ hạn</span>
                               )}
                             </div>
                             <input 
                               type="date"
                               value={pay.dueDate}
                               onChange={(e) => handleUpdatePayment(pay.id, { dueDate: e.target.value })}
-                              className={`bg-transparent border-none p-0 text-xs focus:ring-0 cursor-pointer ${isOverdue ? 'text-rose-500 font-bold' : 'text-slate-400'}`}
+                              className={`bg-transparent border-none p-0 text-xs font-black focus:ring-0 cursor-pointer ${isOverdue ? 'text-rose-700' : 'text-slate-600'}`}
                             />
                           </div>
                           <div className="text-right flex flex-col items-end gap-2">
@@ -584,7 +603,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                                 />
                              ) : (
                                 <p 
-                                  className={`text-sm font-black cursor-pointer hover:text-indigo-600 transition-colors ${isLast ? 'text-indigo-700 text-lg' : 'text-slate-800'}`} 
+                                  className={`text-sm font-black cursor-pointer hover:text-indigo-600 transition-colors ${isLast ? 'text-indigo-800 text-lg' : 'text-slate-900'}`} 
                                   onClick={() => { setEditingPaymentId(pay.id); setTempPaymentAmount(pay.amount); }}
                                 >
                                   {formatVietnameseCurrency(pay.amount)}
@@ -594,8 +613,8 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                                 value={pay.status}
                                 onChange={(e) => handleUpdatePayment(pay.id, { status: e.target.value as any })}
                                 className={`text-[9px] font-black px-3 py-1 rounded-lg border-none outline-none cursor-pointer transition-all ${
-                                  pay.status === 'Đã thu' ? 'bg-emerald-500 text-white' : 
-                                  effectiveStatus === 'Quá hạn' ? 'bg-rose-500 text-white ring-2 ring-rose-200' : 'bg-slate-200 text-slate-500'
+                                  pay.status === 'Đã thu' ? 'bg-emerald-600 text-white' : 
+                                  effectiveStatus === 'Quá hạn' ? 'bg-rose-600 text-white ring-2 ring-rose-200 shadow-sm' : 'bg-slate-200 text-slate-700'
                                 }`}
                               >
                                 <option value="Chưa thu">Chưa thu</option>
@@ -617,12 +636,12 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                   </div>
                   <div className="space-y-3">
                     {selectedProject.files.map(file => (
-                      <div key={file.id} className="bg-slate-50/60 p-4 rounded-2xl flex items-center justify-between group border border-transparent hover:border-indigo-100 hover:bg-white transition-all">
+                      <div key={file.id} className="bg-slate-50/60 p-4 rounded-2xl flex items-center justify-between group border border-transparent hover:border-indigo-100 hover:bg-white transition-all shadow-sm">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-black text-[9px] uppercase">{file.type}</div>
+                          <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-700 font-black text-[9px] uppercase shadow-inner">{file.type}</div>
                           <p className="text-xs font-bold text-slate-700 truncate max-w-[150px]">{file.name}</p>
                         </div>
-                        <button className="text-[10px] font-black text-indigo-600 uppercase">Mở</button>
+                        <button className="text-[10px] font-black text-indigo-700 uppercase hover:underline">Mở</button>
                       </div>
                     ))}
                     {selectedProject.files.length === 0 && (
@@ -684,7 +703,6 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                 </div>
               </div>
 
-              {/* Ô nhập Hạn hoàn thành tổng thể */}
               <div>
                 <label className={labelClass}>Hạn hoàn thành (Theo Hợp đồng) *</label>
                 <input required type="date" value={newProjectData.contractDeadline} onChange={e => setNewProjectData({...newProjectData, contractDeadline: e.target.value})} className={`${inputClass} border-rose-100 bg-rose-50/30`} />
