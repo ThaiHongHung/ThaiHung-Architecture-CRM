@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import ClientManager from './components/ClientManager';
 import ProjectManager from './components/ProjectManager';
 import FinanceManager from './components/FinanceManager';
+import WorkloadManager from './components/WorkloadManager';
 import { PROJECT_STAGES } from './constants';
 import { generateId } from './utils';
 
@@ -21,6 +22,10 @@ const INITIAL_PROJECTS: Project[] = [
     contractCode: 'HĐ2023/KT-01',
     name: 'Biệt thự Anh Quân Lông',
     leadName: 'KTS. Nguyễn Ngọc Kiên',
+    architect: 'KTS. Kiên',
+    structuralEngineer: 'KS. Hoàng',
+    meEngineer: 'KS. Nam',
+    plumbingEngineer: 'KS. Sơn',
     contractSigningDate: '2023-12-01',
     contractType: 'Trọn gói',
     projectType: 'Thấp tầng',
@@ -30,7 +35,7 @@ const INITIAL_PROJECTS: Project[] = [
       id: `s${i}`,
       name,
       status: i < 2 ? 'Hoàn thành' : (i === 2 ? 'Đang làm' : 'Chưa làm'),
-      deadline: i === 2 ? '2024-12-30' : undefined
+      deadline: i === 2 ? '2024-12-30' : undefined,
     })),
     payments: [
       { id: 'pay1', name: 'Tạm ứng đợt 1', amount: 150000000, dueDate: '2023-10-02', status: 'Đã thu' },
@@ -118,6 +123,8 @@ export default function App() {
             onViewClient={() => setCurrentView('clients')}
           />
         );
+      case 'workload':
+        return <WorkloadManager projects={projects} onViewProject={handleViewProject} />;
       case 'finances':
         return <FinanceManager projects={projects} clients={clients} onUpdateProject={updateProject} />;
       default:

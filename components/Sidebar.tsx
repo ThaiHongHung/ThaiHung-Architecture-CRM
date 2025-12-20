@@ -13,6 +13,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView }) => {
     { id: 'dashboard', label: 'Tổng quan', icon: <Icons.Dashboard /> },
     { id: 'clients', label: 'Khách hàng', icon: <Icons.Users /> },
     { id: 'projects', label: 'Dự án', icon: <Icons.Briefcase /> },
+    { id: 'workload', label: 'Nhân sự', icon: <Icons.Staff /> },
     { id: 'finances', label: 'Tài chính', icon: <Icons.Currency /> },
   ];
 

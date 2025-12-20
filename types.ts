@@ -20,8 +20,7 @@ export interface ProjectStage {
   id: string;
   name: string;
   status: ProjectStageStatus;
-  deadline?: string;
-  assignedTo?: string;
+  deadline?: string;     // Hạn nộp hồ sơ (Nội bộ/Kỹ thuật)
 }
 
 export type ContractType = 'Thiết kế' | 'Thi công' | 'Trọn gói';
@@ -51,6 +50,7 @@ export interface Project {
   name: string;
   leadName: string; 
   contractSigningDate?: string; 
+  contractDeadline?: string;    // Hạn hoàn thành cuối cùng theo HĐ
   contractType: ContractType;
   projectType: ProjectType;
   totalValue: number;
@@ -58,6 +58,11 @@ export interface Project {
   payments: PaymentMilestone[];
   files: ProjectFile[];
   createdAt: string;
+  // Nhân sự thực hiện cố định cho toàn dự án
+  architect?: string;           // Kiến trúc
+  structuralEngineer?: string;  // Kết cấu
+  meEngineer?: string;          // Hệ thống cơ điện
+  plumbingEngineer?: string;    // Hệ thống cấp thoát nước
 }
 
-export type View = 'dashboard' | 'clients' | 'projects' | 'finances';
+export type View = 'dashboard' | 'clients' | 'projects' | 'finances' | 'workload';
