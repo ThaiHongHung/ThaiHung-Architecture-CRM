@@ -12,8 +12,8 @@ interface WorkloadManagerProps {
 const WorkloadManager: React.FC<WorkloadManagerProps> = ({ projects, onViewProject }) => {
   const [selectedLead, setSelectedLead] = useState<string | null>(null);
 
-  // Nhóm dữ liệu theo KTS chủ trì
-  const workloadData = useMemo(() => {
+  // Nhóm dữ liệu theo KTS chủ trì và tính toán nhân sự tổng quát
+  const { workloadData, personnelSummary } = useMemo(() => {
     const data: Record<string, {
       activeProjects: Project[];
       completedProjects: Project[];
@@ -22,7 +22,13 @@ const WorkloadManager: React.FC<WorkloadManagerProps> = ({ projects, onViewProje
       overdueCount: number;
     }> = {};
 
+    const uniqueArchitects = new Set<string>();
+    const uniqueStructural = new Set<string>();
+    const uniqueME = new Set<string>();
+    const uniquePlumbing = new Set<string>();
+
     projects.forEach(p => {
+      // Logic nhóm theo Lead
       const lead = p.leadName || 'Chưa phân công';
       if (!data[lead]) {
         data[lead] = { activeProjects: [], completedProjects: [], totalProjects: 0, avgProgress: 0, overdueCount: 0 };
@@ -37,6 +43,12 @@ const WorkloadManager: React.FC<WorkloadManagerProps> = ({ projects, onViewProje
         data[lead].completedProjects.push(p);
       } else {
         data[lead].activeProjects.push(p);
+        
+        // Chỉ tính nhân sự cho các dự án đang triển khai
+        if (p.architect && p.architect.trim()) uniqueArchitects.add(p.architect.trim());
+        if (p.structuralEngineer && p.structuralEngineer.trim()) uniqueStructural.add(p.structuralEngineer.trim());
+        if (p.meEngineer && p.meEngineer.trim()) uniqueME.add(p.meEngineer.trim());
+        if (p.plumbingEngineer && p.plumbingEngineer.trim()) uniquePlumbing.add(p.plumbingEngineer.trim());
       }
       
       data[lead].totalProjects++;
@@ -48,7 +60,15 @@ const WorkloadManager: React.FC<WorkloadManagerProps> = ({ projects, onViewProje
       data[lead].avgProgress = Math.round(data[lead].avgProgress / data[lead].totalProjects);
     });
 
-    return data;
+    return { 
+      workloadData: data,
+      personnelSummary: {
+        arch: uniqueArchitects.size,
+        struct: uniqueStructural.size,
+        me: uniqueME.size,
+        plumb: uniquePlumbing.size
+      }
+    };
   }, [projects]);
 
   const leads = Object.keys(workloadData).sort((a, b) => workloadData[b].activeProjects.length - workloadData[a].activeProjects.length);
@@ -58,10 +78,21 @@ const WorkloadManager: React.FC<WorkloadManagerProps> = ({ projects, onViewProje
   const currentLeadData = selectedLead ? workloadData[selectedLead] : null;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-800">Quản lý Nhân sự thực hiện Dự án</h2>
-        <p className="text-slate-500">Giám sát khối lượng dự án và chi tiết nhân sự theo bộ môn.</p>
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">Quản lý Nhân sự thực hiện Dự án</h2>
+          <p className="text-slate-500">Giám sát khối lượng dự án và chi tiết nhân sự theo bộ môn.</p>
+        </div>
+      </div>
+
+      {/* TÓM TẮT NHÂN SỰ ĐANG PHỤ TRÁCH DỰ ÁN */}
+      {/* Fix: Removed unused 'icon' prop from SummaryBadge components to resolve TypeScript errors */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <SummaryBadge label="Kiến trúc" count={personnelSummary.arch} color="indigo" />
+        <SummaryBadge label="Kết cấu" count={personnelSummary.struct} color="blue" />
+        <SummaryBadge label="Cơ điện" count={personnelSummary.me} countSuffix="M&E" color="slate" />
+        <SummaryBadge label="Nước" count={personnelSummary.plumb} color="cyan" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -148,6 +179,25 @@ const WorkloadManager: React.FC<WorkloadManagerProps> = ({ projects, onViewProje
   );
 };
 
+const SummaryBadge = ({ label, count, color, countSuffix }: { label: string, count: number, color: string, countSuffix?: string }) => {
+  const colorClasses: Record<string, string> = {
+    indigo: 'bg-indigo-50 border-indigo-100 text-indigo-600',
+    blue: 'bg-blue-50 border-blue-100 text-blue-600',
+    slate: 'bg-slate-50 border-slate-200 text-slate-600',
+    cyan: 'bg-cyan-50 border-cyan-100 text-cyan-600'
+  };
+
+  return (
+    <div className={`p-5 rounded-2xl border shadow-sm flex flex-col items-center justify-center transition-transform hover:-translate-y-1 ${colorClasses[color]}`}>
+      <div className="flex items-baseline space-x-1">
+        <span className="text-3xl font-black">{count}</span>
+        {countSuffix && <span className="text-[10px] font-bold opacity-60">{countSuffix}</span>}
+      </div>
+      <p className="text-[10px] font-black uppercase tracking-widest mt-1 opacity-70">{label}</p>
+    </div>
+  );
+};
+
 const PersonnelBox = ({ label, name, active, color }: { label: string, name?: string, active: boolean, color: 'indigo' | 'slate' }) => (
   <div className="overflow-hidden">
     <p className={`text-[8px] font-black uppercase tracking-wider mb-1 ${color === 'indigo' ? 'text-indigo-400' : 'text-slate-400'}`}>{label}</p>
@@ -156,19 +206,5 @@ const PersonnelBox = ({ label, name, active, color }: { label: string, name?: st
     </p>
   </div>
 );
-
-const StatItem = ({ label, value, color }: { label: string, value: number, color: 'indigo' | 'emerald' | 'rose' }) => {
-  const colors = {
-    indigo: 'bg-indigo-50 text-indigo-600 border-indigo-100',
-    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-    rose: 'bg-rose-50 text-rose-600 border-rose-100'
-  };
-  return (
-    <div className={`p-4 rounded-xl border ${colors[color]} text-center`}>
-      <p className="text-2xl font-black">{value}</p>
-      <p className="text-[10px] font-bold uppercase tracking-wide opacity-70">{label}</p>
-    </div>
-  );
-};
 
 export default WorkloadManager;

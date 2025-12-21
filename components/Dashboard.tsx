@@ -45,7 +45,7 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, projects, onViewProject 
       {overdueStages.length > 0 && (
         <div className="bg-rose-50 border-2 border-rose-200 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="bg-rose-500 p-2 rounded-lg text-white">
+            <div className="bg-rose-600 p-2 rounded-lg text-white">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             </div>
             <div>
@@ -58,14 +58,14 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, projects, onViewProject 
               <div 
                 key={idx} 
                 onClick={() => onViewProject && onViewProject(stage.projectId)}
-                className="bg-white p-3 rounded-xl border border-rose-100 flex items-center justify-between group hover:border-rose-300 transition-all cursor-pointer"
+                className="bg-white p-3 rounded-xl border border-rose-100 flex items-center justify-between group hover:border-rose-300 transition-all cursor-pointer shadow-sm"
               >
                 <div className="overflow-hidden">
                   <p className="text-xs font-bold text-slate-800 truncate">{stage.projectName}</p>
                   <p className="text-[10px] text-slate-500">Hạng mục: {stage.name}</p>
                 </div>
                 <div className="text-right ml-3">
-                  <p className="text-[10px] font-black text-rose-500">Hạn: {formatDate(stage.deadline)}</p>
+                  <p className="text-[10px] font-black text-rose-600">Hạn: {formatDate(stage.deadline)}</p>
                 </div>
               </div>
             ))}
@@ -123,7 +123,7 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, projects, onViewProject 
                           )}
 
                           {p.contractDeadline && (
-                            <div className={`flex items-center space-x-1 text-[10px] font-bold px-2.5 py-1 rounded-lg border ${isContractOverdue ? 'text-rose-600 bg-rose-50 border-rose-100 animate-pulse' : 'text-emerald-600 bg-emerald-50 border-emerald-100'}`}>
+                            <div className={`flex items-center space-x-1 text-[10px] font-bold px-2.5 py-1 rounded-lg border ${isContractOverdue ? 'text-rose-700 bg-rose-50 border-rose-200 animate-pulse' : 'text-emerald-600 bg-emerald-50 border-emerald-100'}`}>
                               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                               <span>Hạn HĐ: {formatDate(p.contractDeadline)}</span>
                             </div>
@@ -159,17 +159,17 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, projects, onViewProject 
                     <div 
                       key={idx} 
                       onClick={() => onViewProject && onViewProject(pay.projectId)}
-                      className={`flex items-center justify-between p-3 rounded-xl border transition-all group cursor-pointer ${isLate ? 'bg-rose-50 border-rose-100 hover:bg-rose-100/50' : 'bg-slate-50/30 border-slate-50 hover:bg-emerald-50/30'}`}
+                      className={`flex items-center justify-between p-3 rounded-xl border transition-all group cursor-pointer ${isLate ? 'bg-rose-50 border-rose-200 hover:bg-rose-100/50' : 'bg-slate-50/30 border-slate-50 hover:bg-emerald-50/30'}`}
                     >
                       <div className="overflow-hidden">
-                        <p className={`text-sm font-bold truncate ${isLate ? 'text-rose-800' : 'text-slate-800'}`}>{pay.projectName}</p>
+                        <p className={`text-sm font-bold truncate ${isLate ? 'text-rose-900' : 'text-slate-800'}`}>{pay.projectName}</p>
                         <p className={`text-[11px] font-medium text-slate-500 truncate`}>{pay.name} - {pay.contractCode}</p>
                       </div>
                       <div className="text-right ml-4 flex-shrink-0">
-                        <p className={`text-sm font-black ${isLate ? 'text-rose-700' : 'text-slate-800'}`}>{formatCurrency(pay.amount)}</p>
-                        <p className={`text-[10px] font-bold ${isLate ? 'text-rose-500 uppercase' : 'text-slate-400'}`}>
+                        <p className={`text-sm font-black ${isLate ? 'text-rose-800' : 'text-slate-800'}`}>{formatCurrency(pay.amount)}</p>
+                        <div className={`mt-1 inline-block px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${isLate ? 'bg-rose-100 text-rose-700 ring-1 ring-rose-200' : 'text-slate-400'}`}>
                           {isLate ? 'Quá hạn' : `Hạn: ${formatDate(pay.dueDate)}`}
-                        </p>
+                        </div>
                       </div>
                     </div>
                   );

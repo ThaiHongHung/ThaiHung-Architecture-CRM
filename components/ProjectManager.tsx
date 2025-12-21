@@ -8,6 +8,7 @@ interface ProjectManagerProps {
   projects: Project[];
   clients: Client[];
   onUpdateProject: (project: Project) => void;
+  onDeleteProject: (id: string) => void;
   onAddProject: (project: Omit<Project, 'id' | 'createdAt'>) => void;
   selectedProjectId: string | null;
   setSelectedProjectId: (id: string) => void;
@@ -22,6 +23,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
   projects, 
   clients, 
   onUpdateProject, 
+  onDeleteProject,
   onAddProject,
   selectedProjectId,
   setSelectedProjectId,
@@ -31,6 +33,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('Tất cả');
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeStageIdForUpload, setActiveStageIdForUpload] = useState<string | null>(null);
   
@@ -234,6 +237,13 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
     });
   };
 
+  const handleDeleteConfirm = () => {
+    if (selectedProjectId) {
+      onDeleteProject(selectedProjectId);
+      setShowDeleteModal(false);
+    }
+  };
+
   const inputClass = "w-full px-5 py-3.5 bg-white border border-slate-200 rounded-[1.25rem] outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-700 placeholder:text-slate-300 placeholder:font-medium";
   const labelClass = "block text-[13px] font-bold text-slate-600 mb-2.5 ml-1";
 
@@ -295,6 +305,11 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
               </div>
             </button>
           ))}
+          {filteredProjects.length === 0 && (
+            <div className="text-center py-12 px-4 border-2 border-dashed border-slate-200 rounded-3xl text-slate-400 italic text-sm">
+              Không có dự án nào
+            </div>
+          )}
         </div>
 
         {/* DETAIL SECTION */}
@@ -302,7 +317,18 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
           {selectedProject ? (
             <>
               {/* CHI TIẾT DỰ ÁN HEADER */}
-              <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
+              <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group/detail">
+                {/* Delete Button */}
+                <button 
+                  onClick={() => setShowDeleteModal(true)}
+                  className="absolute top-6 right-6 p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all opacity-0 group-hover/detail:opacity-100"
+                  title="Xóa dự án"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+
                 <div className="flex flex-col md:flex-row justify-between items-start gap-6">
                   <div className="space-y-4 flex-1">
                     <div className="flex flex-wrap items-center gap-3">
@@ -316,7 +342,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                       </div>
                       <span className="bg-indigo-50 text-indigo-600 text-[10px] font-black px-2 py-1 rounded uppercase tracking-wider">{selectedProject.projectType}</span>
                       
-                      {/* Ngày ký HĐ - Đậm màu hơn */}
+                      {/* Ngày ký HĐ */}
                       <div className="flex items-center space-x-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 shadow-sm">
                          <Icons.Dashboard />
                          <span className="text-[10px] font-black uppercase whitespace-nowrap">Ký:</span>
@@ -328,7 +354,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                         />
                       </div>
 
-                      {/* Hạn HĐ tổng thể - Đậm màu hơn */}
+                      {/* Hạn HĐ tổng thể */}
                       <div className="flex items-center space-x-1.5 text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 shadow-sm">
                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                          <span className="text-[10px] font-black uppercase whitespace-nowrap">Hạn HĐ:</span>
@@ -476,7 +502,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                              
                              <div className="space-y-4">
                                 <div>
-                                   <label className={`text-[9px] font-black uppercase tracking-wider mb-1 block ${isOverdue ? 'text-rose-600 animate-pulse' : 'text-slate-500'}`}>
+                                   <label className={`text-[9px] font-black uppercase tracking-wider mb-1 block ${isOverdue ? 'text-rose-700 animate-pulse' : 'text-slate-500'}`}>
                                       Hạn nộp hồ sơ
                                    </label>
                                    <div className="flex items-center space-x-2">
@@ -485,7 +511,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                                         type="date" 
                                         value={stage.deadline || ''} 
                                         onChange={(e) => updateStageDeadline(stage.id, e.target.value)}
-                                        className={`bg-transparent border-none p-0 text-xs font-black focus:ring-0 cursor-pointer ${isOverdue ? 'text-rose-700' : 'text-slate-700'}`}
+                                        className={`bg-transparent border-none p-0 text-xs font-black focus:ring-0 cursor-pointer ${isOverdue ? 'text-rose-800' : 'text-slate-700'}`}
                                       />
                                    </div>
                                 </div>
@@ -580,7 +606,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                                 <span className="bg-indigo-600 text-white text-[7px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Final</span>
                               )}
                               {isOverdue && (
-                                <span className="bg-rose-100 text-rose-700 text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase animate-pulse">Trễ hạn</span>
+                                <span className="bg-rose-100 text-rose-700 text-[8px] font-black px-1.5 py-0.5 rounded-md border border-rose-200 uppercase tracking-tight animate-pulse">Trễ hạn</span>
                               )}
                             </div>
                             <input 
@@ -614,7 +640,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                                 onChange={(e) => handleUpdatePayment(pay.id, { status: e.target.value as any })}
                                 className={`text-[9px] font-black px-3 py-1 rounded-lg border-none outline-none cursor-pointer transition-all ${
                                   pay.status === 'Đã thu' ? 'bg-emerald-600 text-white' : 
-                                  effectiveStatus === 'Quá hạn' ? 'bg-rose-600 text-white ring-2 ring-rose-200 shadow-sm' : 'bg-slate-200 text-slate-700'
+                                  effectiveStatus === 'Quá hạn' ? 'bg-rose-50 text-rose-700 ring-2 ring-rose-200 shadow-sm' : 'bg-slate-200 text-slate-700'
                                 }`}
                               >
                                 <option value="Chưa thu">Chưa thu</option>
@@ -662,6 +688,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
         </div>
       </div>
 
+      {/* NEW PROJECT MODAL */}
       {showNewProjectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
           <div className="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-slate-100 animate-in zoom-in duration-300">
@@ -705,7 +732,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
 
               <div>
                 <label className={labelClass}>Hạn hoàn thành (Theo Hợp đồng) *</label>
-                <input required type="date" value={newProjectData.contractDeadline} onChange={e => setNewProjectData({...newProjectData, contractDeadline: e.target.value})} className={`${inputClass} border-rose-100 bg-rose-50/30`} />
+                <input required type="date" value={newProjectData.contractDeadline} onChange={e => setNewProjectData({...newProjectData, contractDeadline: e.target.value})} className={`${inputClass} border-rose-200 bg-rose-50/30 text-rose-800`} />
               </div>
 
               <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
@@ -759,6 +786,37 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({
                 <button type="submit" className="px-12 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-xl transition-all active:scale-95">Tạo dự án</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-in zoom-in duration-200 p-8 text-center">
+            <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-black text-slate-800 mb-2 uppercase">Xác nhận xóa dự án</h3>
+            <p className="text-slate-500 mb-8 text-sm px-4">
+              Bạn có chắc chắn muốn xóa dự án <span className="font-bold text-slate-800">{selectedProject?.name}</span>? Hành động này không thể hoàn tác.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button 
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 py-4 text-slate-500 font-bold hover:bg-slate-50 rounded-2xl transition-all"
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                onClick={handleDeleteConfirm}
+                className="flex-1 py-4 bg-rose-600 text-white font-bold rounded-2xl shadow-lg shadow-rose-200 hover:bg-rose-700 transition-all active:scale-95"
+              >
+                Xác nhận xóa
+              </button>
+            </div>
           </div>
         </div>
       )}

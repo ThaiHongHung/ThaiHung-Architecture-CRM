@@ -9,6 +9,7 @@ interface ClientManagerProps {
   projects: Project[];
   onAddClient: (client: Omit<Client, 'id' | 'createdAt'>) => void;
   onUpdateClient: (client: Client) => void;
+  onDeleteClient: (id: string) => void;
   onViewProject: (projectId: string) => void;
   onCreateProjectForClient: (clientId: string) => void;
 }
@@ -17,12 +18,15 @@ const ClientManager: React.FC<ClientManagerProps> = ({
   clients, 
   onAddClient, 
   onUpdateClient, 
+  onDeleteClient,
   projects, 
   onViewProject,
   onCreateProjectForClient
 }) => {
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   
   const [formData, setFormData] = useState({
@@ -67,6 +71,19 @@ const ClientManager: React.FC<ClientManagerProps> = ({
     setShowModal(true);
   };
 
+  const handleDeleteClick = (client: Client) => {
+    setClientToDelete(client);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    if (clientToDelete) {
+      onDeleteClient(clientToDelete.id);
+      setShowDeleteModal(false);
+      setClientToDelete(null);
+    }
+  };
+
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingClient(null);
@@ -94,7 +111,6 @@ const ClientManager: React.FC<ClientManagerProps> = ({
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-        {/* VÙNG NHẬP TÌM KIẾM - ĐÃ CHỈNH SỬA SANG MÀU SÁNG */}
         <div className="p-5 border-b border-slate-100 bg-slate-50/30">
           <div className="relative max-w-md">
             <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
@@ -119,7 +135,7 @@ const ClientManager: React.FC<ClientManagerProps> = ({
                 <th className="px-6 py-4">Khách hàng</th>
                 <th className="px-6 py-4">Loại & Trạng thái</th>
                 <th className="px-6 py-4 text-center">Lịch hẹn</th>
-                <th className="px-6 py-4 text-right">Dự án liên kết</th>
+                <th className="px-6 py-4 text-right">Hành động</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -166,18 +182,18 @@ const ClientManager: React.FC<ClientManagerProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end space-x-3">
+                      <div className="flex items-center justify-end space-x-2">
                         {clientProject ? (
                           <button 
                             onClick={() => onViewProject(clientProject.id)}
-                            className="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide hover:bg-indigo-600 hover:text-white transition-all shadow-sm border border-indigo-100"
+                            className="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight hover:bg-indigo-600 hover:text-white transition-all shadow-sm border border-indigo-100"
                           >
-                            Xem dự án: {clientProject.name}
+                            Dự án: {clientProject.name.substring(0, 15)}...
                           </button>
                         ) : (
                           <button 
                             onClick={() => onCreateProjectForClient(client.id)}
-                            className="text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                            className="text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
                           >
                             + Tạo dự án
                           </button>
@@ -187,8 +203,17 @@ const ClientManager: React.FC<ClientManagerProps> = ({
                           className="p-1.5 text-slate-300 hover:text-indigo-600 transition-colors"
                           title="Sửa khách hàng"
                         >
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteClick(client)}
+                          className="p-1.5 text-slate-300 hover:text-rose-600 transition-colors"
+                          title="Xóa khách hàng"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
                       </div>
@@ -269,6 +294,42 @@ const ClientManager: React.FC<ClientManagerProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-in zoom-in duration-200 p-8 text-center">
+            <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-black text-slate-800 mb-2 uppercase">Xác nhận xóa khách hàng</h3>
+            <p className="text-slate-500 mb-4 text-sm px-4">
+              Bạn có chắc chắn muốn xóa khách hàng <span className="font-bold text-slate-800">{clientToDelete?.name}</span>?
+            </p>
+            {projects.some(p => p.clientId === clientToDelete?.id) && (
+              <p className="mb-8 text-rose-600 font-bold text-[10px] uppercase tracking-wider bg-rose-50 p-3 rounded-xl border border-rose-100">
+                Lưu ý: Khách hàng này đang có dự án liên kết. Xóa khách hàng sẽ khiến dự án không còn thông tin chủ đầu tư.
+              </p>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button 
+                onClick={() => {setShowDeleteModal(false); setClientToDelete(null);}}
+                className="flex-1 py-4 text-slate-500 font-bold hover:bg-slate-50 rounded-2xl transition-all"
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                onClick={confirmDelete}
+                className="flex-1 py-4 bg-rose-600 text-white font-bold rounded-2xl shadow-lg shadow-rose-200 hover:bg-rose-700 transition-all active:scale-95"
+              >
+                Xác nhận xóa
+              </button>
+            </div>
           </div>
         </div>
       )}

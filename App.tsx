@@ -80,8 +80,22 @@ export default function App() {
     setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
   };
 
+  const deleteProject = (id: string) => {
+    const remainingProjects = projects.filter(p => p.id !== id);
+    setProjects(remainingProjects);
+    if (selectedProjectId === id) {
+      setSelectedProjectId(remainingProjects.length > 0 ? remainingProjects[0].id : null);
+    }
+  };
+
   const updateClient = (updatedClient: Client) => {
     setClients(prev => prev.map(c => c.id === updatedClient.id ? updatedClient : c));
+  };
+
+  const deleteClient = (id: string) => {
+    setClients(prev => prev.filter(c => c.id !== id));
+    // Optional: Also delete projects belonging to this client or notify user
+    // For now, we keep projects to avoid data loss, but they will show as having no client
   };
 
   const handleViewProject = (projectId: string) => {
@@ -104,6 +118,7 @@ export default function App() {
             clients={clients} 
             onAddClient={addClient} 
             onUpdateClient={updateClient} 
+            onDeleteClient={deleteClient}
             projects={projects} 
             onViewProject={handleViewProject}
             onCreateProjectForClient={handleCreateProjectForClient}
@@ -115,6 +130,7 @@ export default function App() {
             projects={projects} 
             clients={clients} 
             onUpdateProject={updateProject} 
+            onDeleteProject={deleteProject}
             onAddProject={addProject}
             selectedProjectId={selectedProjectId}
             setSelectedProjectId={setSelectedProjectId}
