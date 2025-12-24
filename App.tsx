@@ -55,13 +55,14 @@ export default function App() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(INITIAL_PROJECTS[0]?.id || null);
   const [targetClientIdForNewProject, setTargetClientIdForNewProject] = useState<string | null>(null);
 
-  const addClient = (client: Omit<Client, 'id' | 'createdAt'>) => {
+  const addClient = (client: Omit<Client, 'id' | 'createdAt'>): Client => {
     const newClient: Client = {
       ...client,
       id: generateId(),
       createdAt: new Date().toISOString()
     };
     setClients(prev => [...prev, newClient]);
+    return newClient;
   };
 
   const addProject = (project: Omit<Project, 'id' | 'createdAt'>) => {
@@ -94,8 +95,6 @@ export default function App() {
 
   const deleteClient = (id: string) => {
     setClients(prev => prev.filter(c => c.id !== id));
-    // Optional: Also delete projects belonging to this client or notify user
-    // For now, we keep projects to avoid data loss, but they will show as having no client
   };
 
   const handleViewProject = (projectId: string) => {

@@ -7,7 +7,7 @@ import { formatDate } from '../utils';
 interface ClientManagerProps {
   clients: Client[];
   projects: Project[];
-  onAddClient: (client: Omit<Client, 'id' | 'createdAt'>) => void;
+  onAddClient: (client: Omit<Client, 'id' | 'createdAt'>) => Client;
   onUpdateClient: (client: Client) => void;
   onDeleteClient: (id: string) => void;
   onViewProject: (projectId: string) => void;
@@ -28,6 +28,7 @@ const ClientManager: React.FC<ClientManagerProps> = ({
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [createProjectImmediately, setCreateProjectImmediately] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -50,8 +51,10 @@ const ClientManager: React.FC<ClientManagerProps> = ({
         notes: editingClient.notes,
         nextFollowUp: editingClient.nextFollowUp || ''
       });
+      setCreateProjectImmediately(false);
     } else {
       setFormData({ name: '', phone: '', zalo: '', type: 'Nhà phố', status: 'Mới', notes: '', nextFollowUp: '' });
+      setCreateProjectImmediately(false);
     }
   }, [editingClient]);
 
@@ -60,10 +63,14 @@ const ClientManager: React.FC<ClientManagerProps> = ({
     if (editingClient) {
       const updatedClient = { ...editingClient, ...formData };
       onUpdateClient(updatedClient);
+      handleCloseModal();
     } else {
-      onAddClient(formData);
+      const newClient = onAddClient(formData);
+      handleCloseModal();
+      if (createProjectImmediately) {
+        onCreateProjectForClient(newClient.id);
+      }
     }
-    handleCloseModal();
   };
 
   const handleEditClick = (client: Client) => {
@@ -87,6 +94,7 @@ const ClientManager: React.FC<ClientManagerProps> = ({
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingClient(null);
+    setCreateProjectImmediately(false);
   };
 
   const filteredClients = clients.filter(c => 
@@ -286,6 +294,28 @@ const ClientManager: React.FC<ClientManagerProps> = ({
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Ghi chú nhanh</label>
                   <textarea rows={3} value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Yêu cầu cụ thể, sở thích..."></textarea>
                 </div>
+                
+                {/* CREATE PROJECT IMMEDIATELY TOGGLE */}
+                {!editingClient && (
+                  <div className="pt-2">
+                    <label className="flex items-center space-x-3 cursor-pointer group">
+                      <div className="relative">
+                        <input 
+                          type="checkbox" 
+                          className="sr-only" 
+                          checked={createProjectImmediately}
+                          onChange={e => setCreateProjectImmediately(e.target.checked)}
+                        />
+                        <div className={`block w-10 h-6 rounded-full transition-colors ${createProjectImmediately ? 'bg-indigo-600' : 'bg-slate-200'}`}></div>
+                        <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${createProjectImmediately ? 'transform translate-x-4' : ''}`}></div>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-800">Tạo dự án ngay sau khi lưu</span>
+                        <span className="text-[10px] text-slate-400 font-medium italic">Tự động chuyển đến màn hình khởi tạo dự án cho khách này</span>
+                      </div>
+                    </label>
+                  </div>
+                )}
               </div>
               <div className="pt-4 flex space-x-3">
                 <button type="button" onClick={handleCloseModal} className="flex-1 py-3 text-slate-600 font-semibold hover:bg-slate-50 rounded-xl transition-colors">Hủy</button>

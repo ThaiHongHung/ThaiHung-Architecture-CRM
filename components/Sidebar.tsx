@@ -20,7 +20,11 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView }) => {
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-slate-200 hidden lg:flex flex-col z-30">
       <div className="p-6 border-b border-slate-100 flex items-center space-x-3">
-        <div className="w-10 h-10 bg-indigo-600 rounded-lg flex-shrink-0 flex items-center justify-center text-white font-bold text-lg">TH</div>
+        <img 
+          src="https://i.postimg.cc/qBCmS4Pm/LG2_copy.jpg" 
+          alt="ThaiHung Logo" 
+          className="w-10 h-10 rounded-lg object-cover shadow-sm border border-slate-100" 
+        />
         <div className="flex flex-col overflow-hidden">
           <h1 className="text-sm font-bold text-slate-800 leading-tight truncate">ThaiHung</h1>
           <p className="text-[10px] font-medium text-indigo-600 uppercase tracking-tighter">Architecture CRM</p>
